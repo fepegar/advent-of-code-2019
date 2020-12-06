@@ -38,26 +38,32 @@ def get_op(instruction):
 class IntComputer:
     def __init__(self, program):
         self.program = program[:]
+        self.idx = 0
 
-    def run(self, program_input=None):
+    def run(self, program_inputs=None):
         outputs = []
-        if program_input is None:
+        if program_inputs is None:
             import sys
-            program_input = int(sys.argv[1])
-            # program_input = int(input('Input: '))
+            program_inputs = [int(n) for n in sys.argv[1:]]
+        else:
+            try:
+                iter(program_inputs)
+            except TypeError:
+                program_inputs = [program_inputs]
+        program_inputs = program_inputs[::-1]  # to pop
         idx = 0
         while True:
             instruction = self.program[idx]
             op = get_op(instruction)
             if op == 99:
-                return outputs[-1]
+                return outputs
             num_params = num_params_dict[op]
             params = self.program[idx + 1: idx + 1 + num_params]
             if op in (INPUT, OUTPUT):
                 result_idx = self.program[idx + 1]
                 if op == INPUT:
-                    self.program[result_idx] = program_input
-                else:
+                    self.program[result_idx] = program_inputs.pop()
+                elif op == OUTPUT:
                     output = self.program[result_idx]
                     outputs.append(output)
                 idx += 2
