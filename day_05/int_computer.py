@@ -59,16 +59,17 @@ class IntComputer:
                 return outputs
             num_params = num_params_dict[op]
             params = self.program[idx + 1: idx + 1 + num_params]
-            if op in (INPUT, OUTPUT):
+            mode_a, mode_b = get_modes(instruction)
+            if op == INPUT:
                 result_idx = self.program[idx + 1]
-                if op == INPUT:
-                    self.program[result_idx] = program_inputs.pop()
-                elif op == OUTPUT:
-                    output = self.program[result_idx]
-                    outputs.append(output)
+                self.program[result_idx] = program_inputs.pop()
+                idx += 2
+            elif op == OUTPUT:
+                param = params[0]
+                output = param if mode_a == IMMEDIATE else self.program[param]
+                outputs.append(output)
                 idx += 2
             else:
-                mode_a, mode_b = get_modes(instruction)
                 num_params = num_params_dict[op]
                 params = self.program[idx + 1: idx + 1 + num_params]
                 param_a, param_b = params[:2]

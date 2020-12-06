@@ -4,7 +4,7 @@ with open('input.txt') as f:
     program = [int(n) for n in f.read().strip().split(',')]
 
 # Part 1
-print(IntComputer(program).run(1)[-1])
+print(IntComputer(program).run(1))
 
 # Part 2
 is_8_pos = [3,9,8,9,10,9,4,9,99,-1,8]
