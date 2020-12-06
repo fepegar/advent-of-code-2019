@@ -34,15 +34,19 @@ def get_op(instruction):
     string = f'{instruction:05d}'
     return int(string[-2:])
 
-def run(program, program_input):
+def run(program, program_input=None):
+    outputs = []
+    if program_input is None:
+        import sys
+        program_input = int(sys.argv[1])
+        # program_input = int(input('Input: '))
     program = program[:]
     idx = 0
     while True:
         instruction = program[idx]
         op = get_op(instruction)
         if op == 99:
-            return
-        mode_a, mode_b = get_modes(instruction)
+            return outputs[-1]
         num_params = num_params_dict[op]
         params = program[idx + 1: idx + 1 + num_params]
         if op in (INPUT, OUTPUT):
@@ -51,7 +55,7 @@ def run(program, program_input):
                 program[result_idx] = program_input
             else:
                 output = program[result_idx]
-                print(output)
+                outputs.append(output)
             idx += 2
         else:
             mode_a, mode_b = get_modes(instruction)
@@ -61,10 +65,12 @@ def run(program, program_input):
             a = param_a if mode_a == IMMEDIATE else program[param_a]
             b = param_b if mode_b == IMMEDIATE else program[param_b]
             if op in (JUMP_TRUE, JUMP_FALSE):
-                if a and JUMP_TRUE:
+                if a and op == JUMP_TRUE:
                     idx = b
-                if not a and JUMP_FALSE:
+                elif (not a) and op == JUMP_FALSE:
                     idx = b
+                else:
+                    idx += 3
             else:
                 result_idx = params[2]
                 if op == ADD:
@@ -72,13 +78,42 @@ def run(program, program_input):
                 elif op == MULT:
                     result = a * b
                 elif op == LESS_THAN:
-                    result = a < b
+                    result = int(a < b)
                 elif op == EQUAL:
-                    result = a == b
+                    result = int(a == b)
                 program[result_idx] = result
                 idx += 4
 
 with open('input.txt') as f:
     program = [int(n) for n in f.read().strip().split(',')]
 
-run(program, 1)
+# Part 1
+print(run(program, 1))
+
+# Part 2
+is_8_pos = [3,9,8,9,10,9,4,9,99,-1,8]
+assert run(is_8_pos, 8)
+assert not run(is_8_pos, 7)
+assert not run(is_8_pos, 9)
+
+lt_8_pos = [3,9,7,9,10,9,4,9,99,-1,8]
+assert run(lt_8_pos, 7)
+assert not run(lt_8_pos, 8)
+assert not run(lt_8_pos, 9)
+
+is_8_imm = [3,3,1108,-1,8,3,4,3,99]
+assert run(is_8_imm, 8)
+assert not run(is_8_imm, 7)
+assert not run(is_8_imm, 9)
+
+lt_8_imm = [3,3,1107,-1,8,3,4,3,99]
+assert run(lt_8_imm, 7)
+assert not run(lt_8_imm, 8)
+assert not run(lt_8_imm, 9)
+
+is_nz_pos = [3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9]
+assert run(is_nz_pos, 1)
+assert run(is_nz_pos, -1)
+assert not run(is_nz_pos, 0)
+
+print(run(program, 5))
