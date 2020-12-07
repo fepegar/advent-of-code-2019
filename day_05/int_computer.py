@@ -40,17 +40,16 @@ class IntComputer:
         self.program = program[:]
         self.idx = 0
 
-    def run(self, program_inputs=None):
+    def run(self, inputs=None):
         outputs = []
-        if program_inputs is None:
+        if inputs is None:
             import sys
-            program_inputs = [int(n) for n in sys.argv[1:]]
+            inputs = [int(n) for n in sys.argv[1:]]
         else:
             try:
-                iter(program_inputs)
+                iter(inputs)
             except TypeError:
-                program_inputs = [program_inputs]
-        program_inputs = program_inputs[::-1]  # to pop
+                inputs = [inputs]
         idx = 0
         while True:
             instruction = self.program[idx]
@@ -62,7 +61,7 @@ class IntComputer:
             mode_a, mode_b = get_modes(instruction)
             if op == INPUT:
                 result_idx = self.program[idx + 1]
-                self.program[result_idx] = program_inputs.pop()
+                self.program[result_idx] = inputs.pop(0)
                 idx += 2
             elif op == OUTPUT:
                 param = params[0]
